@@ -13,16 +13,18 @@ module Bilingual
   end
 
   def method_missing *args
+    ret = ""
     sync do
       property_name = args[0].to_s.camelize(:lower)
       property_reference =  "#{@js_object_reference}.#{property_name}"
       if CONTEXT.eval("typeof #{property_reference} == 'function'")
         arguments = args[1..-1].join ','
-        CONTEXT.eval "#{property_reference}(#{arguments})"
+        ret = CONTEXT.eval "#{property_reference}(#{arguments})"
       else
-        CONTEXT.eval property_reference
+        ret = CONTEXT.eval property_reference
       end
     end
+    ret
   end
 
   def js_object
@@ -45,10 +47,12 @@ module Bilingual
     self.class.vars_to_sync.each do |name|
       sync_ruby_to_js name
     end
+
     yield
-    #vars_to_sync.each do |name|
-      #sync_js_to_ruby name
-    #end
+
+    self.class.vars_to_sync.each do |name|
+      sync_js_to_ruby name
+    end
   end
 
   def self.included(base)
@@ -91,7 +95,6 @@ class TestBilingual < Test::Unit::TestCase
     assert_equal test.initials , "JK"
 
     test.change_name
-    test.sync_js_to_ruby "full_name"
     assert_equal "Harry Mendel", test.full_name
   end
 end
