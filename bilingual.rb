@@ -8,8 +8,8 @@ module Bilingual
 
   def initialize
     CONTEXT.eval("objects.push(new #{self.class.js_class_name})")
-    @js_index = CONTEXT.eval("objects.length") - 1
-    @js_object_reference = "objects[#{@js_index}]"
+    js_index = CONTEXT.eval("objects.length") - 1
+    @js_object_reference = "objects[#{js_index}]"
   end
 
   def method_missing *args
@@ -20,6 +20,14 @@ module Bilingual
       CONTEXT.eval "#{property_reference}(#{arguments})"
     else
       CONTEXT.eval property_reference
+    end
+  end
+
+  def sync_ruby_to_js name
+    var = self.__send__ "#{name}"
+    if var.class.name == "String"
+      CONTEXT.eval "#{@js_object_reference}.#{name.camelize(:lower)} = '#{var}'"
+      p CONTEXT.eval @js_object_reference
     end
   end
 
@@ -39,6 +47,7 @@ end
 class TestClass
   include Bilingual
   set_js_class 'TestClass'
+  attr_accessor :full_name
   def call_js_from_ruby
     from_js + " and from ruby land"
   end
@@ -52,5 +61,9 @@ class TestBilingual < Test::Unit::TestCase
     assert test.call_js_from_ruby == "hey from javascript land and from ruby land"
     assert test.add_two 2 == 4
     assert test.object['prop'] == 'val'
+
+    test.full_name = "Jeremy Karmel"
+    test.sync_ruby_to_js 'full_name'
+    assert_equal test.initials , "JK"
   end
 end
