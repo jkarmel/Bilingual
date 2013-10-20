@@ -1,5 +1,6 @@
 require 'execjs'
 require 'active_support/core_ext'
+require "test/unit"
 
 module Bilingual
   CONTEXT = ExecJS.compile File.open('test.js').read
@@ -9,7 +10,8 @@ module Bilingual
     method_name = args[0].to_s.camelize(:lower)
     prop =  "objects[#{@js_index}].#{method_name}"
     if CONTEXT.eval("typeof #{prop} == 'function'")
-      CONTEXT.eval "#{prop}()"
+      arguments = args[1..-1].join ','
+      CONTEXT.eval "#{prop}(#{arguments})"
     else
       CONTEXT.eval prop
     end
@@ -28,6 +30,12 @@ class TestClass
   end
 end
 
-test = TestClass.new
-p test.a
-p test.call_js_from_ruby
+
+class TestBilingual < Test::Unit::TestCase
+  def test_something
+    test = TestClass.new
+    assert test.a == 2
+    assert test.call_js_from_ruby == "hey from javascript land and from ruby land"
+    assert test.add_two 2 == 4
+  end
+end
