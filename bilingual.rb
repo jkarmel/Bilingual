@@ -51,5 +51,6 @@ class TestBilingual < Test::Unit::TestCase
     assert test.a == 2
     assert test.call_js_from_ruby == "hey from javascript land and from ruby land"
     assert test.add_two 2 == 4
+    assert test.object['prop'] == 'val'
   end
 end

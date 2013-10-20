@@ -6,4 +6,5 @@ TestClass = function() {
   this.addTwo = function(num) {
     return num + 2
   }
+  this.object = { prop: 'val' }
 }
