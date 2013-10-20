@@ -12,4 +12,7 @@ TestClass = function() {
     var last = this.fullName.split(' ')[1]
     return first[0] + last[0]
   }
+  this.changeName = function() {
+    this.fullName = "Harry Mendel"
+  }
 }
