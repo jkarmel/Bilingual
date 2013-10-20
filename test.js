@@ -7,12 +7,12 @@ TestClass = function() {
     return num + 2
   }
   this.object = { prop: 'val' }
+}
+Person = function() {
   this.initials = function() {
-    var first = this.fullName.split(' ')[0]
-    var last = this.fullName.split(' ')[1]
-    return first[0] + last[0]
+    return this.firstName[0] + this.lastName[0]
   }
-  this.changeName = function() {
-    this.fullName = "Harry Mendel"
+  this.fullName = function() {
+    return this.firstName + ' ' + this.lastName
   }
 }
