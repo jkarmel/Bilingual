@@ -1,23 +1,28 @@
 require 'execjs'
 require 'active_support/core_ext'
 
+module Bilingual
+  CONTEXT = ExecJS.compile File.open('test.js').read
+  CONTEXT.eval "objects = []"
 
-class TestClass
-  def initialize
-    @context = ExecJS.compile File.open('test.js').read
-    @context.eval "objects = []"
-    @context.eval("objects.push(new TestClass)")
-    @js_index = @context.eval("objects.length") - 1
-  end
   def method_missing *args
     method_name = args[0].to_s.camelize(:lower)
     prop =  "objects[#{@js_index}].#{method_name}"
-    if @context.eval("typeof #{prop} == 'function'")
-      @context.eval "#{prop}()"
+    if CONTEXT.eval("typeof #{prop} == 'function'")
+      CONTEXT.eval "#{prop}()"
     else
-      @context.eval prop
+      CONTEXT.eval prop
     end
   end
+
+  def initialize
+    CONTEXT.eval("objects.push(new TestClass)")
+    @js_index = CONTEXT.eval("objects.length") - 1
+  end
+end
+
+class TestClass
+  include Bilingual
   def call_js_from_ruby
     from_js + " and from ruby land"
   end
