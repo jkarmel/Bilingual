@@ -56,6 +56,7 @@ module Bilingual
 
   def self.included(base)
     base.extend(ClassMethods)
+    base.vars_to_sync = []
   end
 
   module ClassMethods
@@ -74,8 +75,6 @@ end
 class TestClass
   include Bilingual
   set_js_class 'TestClass'
-  attr_accessor :full_name
-  js_sync :full_name
   def call_js_from_ruby
     from_js + " and from ruby land"
   end
@@ -86,9 +85,6 @@ class Person
   set_js_class 'Person'
   attr_accessor :first_name, :last_name
   js_sync :first_name, :last_name
-  def call_js_from_ruby
-    from_js + " and from ruby land"
-  end
 end
 
 
