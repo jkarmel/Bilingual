@@ -6,21 +6,21 @@ module Bilingual
   CONTEXT = ExecJS.compile File.open('test.js').read
   CONTEXT.eval "objects = []"
 
-
-  def method_missing *args
-    method_name = args[0].to_s.camelize(:lower)
-    prop =  "objects[#{@js_index}].#{method_name}"
-    if CONTEXT.eval("typeof #{prop} == 'function'")
-      arguments = args[1..-1].join ','
-      CONTEXT.eval "#{prop}(#{arguments})"
-    else
-      CONTEXT.eval prop
-    end
-  end
-
   def initialize
     CONTEXT.eval("objects.push(new #{self.class.js_class_name})")
     @js_index = CONTEXT.eval("objects.length") - 1
+    @js_object_reference = "objects[#{@js_index}]"
+  end
+
+  def method_missing *args
+    property_name = args[0].to_s.camelize(:lower)
+    property_reference =  "#{@js_object_reference}.#{property_name}"
+    if CONTEXT.eval("typeof #{property_reference} == 'function'")
+      arguments = args[1..-1].join ','
+      CONTEXT.eval "#{property_reference}(#{arguments})"
+    else
+      CONTEXT.eval property_reference
+    end
   end
 
   def self.included(base)
